@@ -1,3 +1,4 @@
+#launch with streamlit run file_upload_app/app.py
 import os
 import streamlit as st
 import streamlit.components as stc
@@ -5,19 +6,22 @@ import pandas as pd
 from PIL import Image
 from PyPDF2 import PdfReader
 import docx2txt
-import  logging
+import logging
 import base64
 import time
 
-logger=logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-formatter=logging.Formatter("%(levelname)s %(asctime)s.%(msecs)03d - %(message)s")
+formatter = logging.Formatter(
+    "%(levelname)s %(asctime)s.%(msecs)03d - %(message)s")
 
 file_handler = logging.FileHandler("activity.log")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
+
+my_var="From Main App_py page"
 
 class FileDownloader(object):
     """Class to download an object as a file 
@@ -29,20 +33,19 @@ class FileDownloader(object):
         _type_: a FileDownloader
     """
 
-    def __init__(self,data,filename="myfile",fileext="txt") -> None:
-        super(FileDownloader,self).__init__()
-        self.data=data
-        self.filename=filename
-        self.fileext=fileext
-        self.timestr=time.strftime("%Y%m%d-%H%M%S")
+    def __init__(self, data, filename="myfile", fileext="txt") -> None:
+        super(FileDownloader, self).__init__()
+        self.data = data
+        self.filename = filename
+        self.fileext = fileext
+        self.timestr = time.strftime("%Y%m%d-%H%M%S")
 
     def download(self):
-        b64=base64.b64encode(self.data.encode()).decode()
-        new_filename=f"{self.filename}_{self.timestr}.{self.fileext}"
+        b64 = base64.b64encode(self.data.encode()).decode()
+        new_filename = f"{self.filename}_{self.timestr}.{self.fileext}"
         st.markdown("#### Dowlnload File ####")
-        href=f"<a href='data:file/{self.fileext};base64,{b64}' download='{new_filename}'>Click here</a>"
-        st.markdown(href,unsafe_allow_html=True)
-
+        href = f"<a href='data:file/{self.fileext};base64,{b64}' download='{new_filename}'>Click here</a>"
+        st.markdown(href, unsafe_allow_html=True)
 
 
 @st.cache
@@ -59,16 +62,20 @@ def read_pdf(file):
         all_page_text += page.extract_text()
     return all_page_text
 
+
 def save_uploaded_file(uploadedfile):
-    with open(os.path.join("tempdir",uploadedfile.name),"wb") as f:
+    with open(os.path.join("tempdir", uploadedfile.name), "wb") as f:
         f.write(uploadedfile.getbuffer())
     return st.success("File saved")
+
 
 def main():
     st.title("File Upload tutorial")
 
-    menu = ["Home", "Dataset", "Documents","Download", "About"]
+    menu = ["Home", "Dataset", "Documents", "Download", "About"]
     choice = st.sidebar.selectbox("Menu", menu)
+
+    st.write(my_var)
 
     if choice == "Home":
         st.subheader("Home")
@@ -87,16 +94,23 @@ def main():
     elif choice == "Dataset":
         st.subheader("Dataset")
         logger.info("Dataset")
-        
+
         data_file = st.file_uploader("Upload csv", type=["csv"])
         if data_file is not None:
             file_details = {"filename": data_file.name,
                             "filetype": data_file.type, "filesize": data_file.size}
-            st.write(file_details)
-            df = pd.read_csv(data_file)
-            st.dataframe(df)
 
+            st.write(file_details)
             save_uploaded_file(data_file)
+            df = pd.read_csv(data_file)
+
+            form = st.form("edit_form")
+            edited_df = form.data_editor(df)
+            save_button = form.form_submit_button("Save Data")
+
+            if save_button:
+                edited_df.to_csv(os.path.join(
+                    "tempdir", "edited_"+data_file.name), sep=",")
 
     elif choice == "Documents":
         st.subheader("Documents")
@@ -120,15 +134,14 @@ def main():
                     st.write(raw_text)
 
             save_uploaded_file(docx_file)
-    elif choice =="Download":
+    elif choice == "Download":
         st.subheader("Download text")
         logger.info("Download")
 
-
-        my_text=st.text_area("Your message")
+        my_text = st.text_area("Your message")
         if st.button("Save"):
             st.write(my_text)
-            download=FileDownloader(my_text).download()
+            download = FileDownloader(my_text).download()
 
 
 if __name__ == '__main__':
