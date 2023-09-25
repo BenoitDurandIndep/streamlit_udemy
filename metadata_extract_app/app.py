@@ -27,6 +27,10 @@ HTML_BANNER = """
         <h1 style="color:white;text-align:center;">MetaData Extractor App</h1>
     </div>
 """
+#Constants for Sonar
+META_TAGS="Meta Tags"
+FILE_STATS="File Stats"
+DL_RES="Download results"
 
 
 # Functions
@@ -121,10 +125,10 @@ def main():
                 "Modified_Time": get_readable_time(statinfo.st_mtime),
             }
             df_file_details = pd.DataFrame(
-                list(file_details_combined.items()), columns=["Meta Tags", "Value"]
+                list(file_details_combined.items()), columns=[META_TAGS, "Value"]
             )
 
-            with st.expander("File Stats"):
+            with st.expander(FILE_STATS):
                 st.dataframe(df_file_details.astype(str))
 
             add_file_details(
@@ -151,7 +155,7 @@ def main():
                     }
 
                     df_img_details_def = pd.DataFrame(
-                        list(img_details.items()), columns=["Meta Tags", "Value"]
+                        list(img_details.items()), columns=[META_TAGS, "Value"]
                     )
                     st.dataframe(df_img_details_def.astype(str))
 
@@ -159,11 +163,11 @@ def main():
                 with st.expander("Exifread tool"):
                     meta_tags = exifread.process_file(image_file)
                     df_meta_tags_exi = pd.DataFrame(
-                        list(meta_tags.items()), columns=["Meta Tags", "Value"]
+                        list(meta_tags.items()), columns=[META_TAGS, "Value"]
                     )
                     st.dataframe(df_meta_tags_exi.astype(str))
 
-            with st.expander("Download results"):
+            with st.expander(DL_RES):
                 final_df = pd.concat(
                     [df_file_details, df_img_details_def, df_meta_tags_exi]
                 )
@@ -193,10 +197,10 @@ def main():
                     "Modified_Time": get_readable_time(statinfo.st_mtime),
                 }
                 df_file_details = pd.DataFrame(
-                    list(file_details_combined.items()), columns=["Meta Tags", "Value"]
+                    list(file_details_combined.items()), columns=[META_TAGS, "Value"]
                 )
 
-                with st.expander("File Stats"):
+                with st.expander(FILE_STATS):
                     st.dataframe(df_file_details.astype(str))
 
             add_file_details(
@@ -206,11 +210,11 @@ def main():
             with st.expander("Metadata with Mutagen"):
                 meta_tags = mutagen.File(audio_file)
                 df_audio_details = pd.DataFrame(
-                    list(meta_tags.items()), columns=["Meta Tags", "Value"]
+                    list(meta_tags.items()), columns=[META_TAGS, "Value"]
                 )
                 st.dataframe(df_audio_details.astype(str))
 
-            with st.expander("Download results"):
+            with st.expander(DL_RES):
                 final_df = pd.concat([df_file_details, df_audio_details])
                 st.dataframe(final_df.astype(str))
                 make_download(final_df)
@@ -240,7 +244,7 @@ def main():
             add_file_details(text_file.name, text_file.type, text_file.size, dt.now())
 
             with dcol1:
-                with st.expander("File Stats"):
+                with st.expander(FILE_STATS):
                     st.dataframe(df_file_details.astype(str))
 
             with dcol2:
@@ -248,11 +252,11 @@ def main():
                     pdf_file = PdfReader(text_file)
                     pdf_info = pdf_file.metadata
                     df_pdf_details = pd.DataFrame(
-                        list(pdf_info.items()), columns=["Meta Tags", "Value"]
+                        list(pdf_info.items()), columns=[META_TAGS, "Value"]
                     )
                     st.dataframe(df_pdf_details.astype(str))
 
-            with st.expander("Download results"):
+            with st.expander(DL_RES):
                 final_df = pd.concat([df_file_details, df_pdf_details])
                 st.dataframe(final_df.astype(str))
                 make_download(final_df)
