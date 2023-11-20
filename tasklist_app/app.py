@@ -3,6 +3,7 @@
 import streamlit as st
 from post_page import run_task_page
 from manage_page import run_analytics_page
+from home_page import run_home_page
 
 def main():
     st.title("Simple Tasklist App")
@@ -11,7 +12,7 @@ def main():
     choice =st.sidebar.selectbox("Menu",menu)
 
     if choice=="Home":
-        st.subheader("Home")
+        run_home_page()
 
     elif choice=="Task":
         run_task_page()
